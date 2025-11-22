@@ -19,6 +19,7 @@ All scripts operate on local SSMS configuration data, require administrator priv
   - `DecryptedConnectionStrings.txt`
   - `DecryptedCredentials.txt`  
   Requires PowerShell 7.x (DPAPI) and admin rights.
+  More info: [PowerShell script to extract SSMS 21 and 22 saved connection data](https://vladdba.com/2025/11/22/powershell-extract-ssms-21-22-saved-connection-information/)
 
 ### Usage
 

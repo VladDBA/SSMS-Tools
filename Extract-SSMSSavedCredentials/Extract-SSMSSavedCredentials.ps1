@@ -1,6 +1,8 @@
 #Requires -RunAsAdministrator
 #Requires -Version 7.0
+
 <#
+
 .SYNOPSIS
     Extracts and decrypts DPAPI-encrypted connection strings and credentials from SSMS privateregistry.bin files.
 
@@ -46,9 +48,10 @@
     - DecryptedCredentials.txt: Contains the decrypted credentials - data source, user ID, and password.
 
 .LINK
-    For more information, visit: https://github.com/VladDBA
-
+    For more information, visit: https://vladdba.com/2025/11/22/powershell-extract-ssms-21-22-saved-connection-information/
 #>
+
+
 param (
     [Parameter(Mandatory = $false)]
     [switch]$KeepRegFiles
@@ -97,8 +100,6 @@ $CredentialsPath = Join-Path -Path $ScriptPath -ChildPath 'DecryptedCredentials.
 
 $ConnStrings = @()
 $Credentials = @()
-# output file header
-$ConnStrings += "Connection Name (how it's displayed in SSMS): Decrypted Connection String"
 
 $TotalConnStrings = 0
 $TotalCredentials = 0
@@ -196,20 +197,23 @@ foreach ($Folder in $MatchingDirs) {
     $Credentials += "`n### Decrypted credentials from $FName ###"
     # Load the .reg file
     $Connections = Select-String $RegFilePath -Pattern '"Connection\d' -Raw
-    Write-Host " Found $($Connections.Count) saved connections in $FName." -Fore Green
-    if( $Connections.Count -eq 0) {
+    
+    if ( $Connections.Count -eq 0) {
+        # no need to continue if there's nothing to process
         Write-Host " No saved connections found in $FName - skipping decryption." -Fore Yellow
         # clean up .reg file unless told otherwise
         if ((-not $KeepRegFiles) -and (Test-Path -Path $RegFilePath)) {
             Remove-Item -Path $RegFilePath -Force
         }
         continue
+    } else {
+        Write-Host " Found $($Connections.Count) saved connections in $FName." -Fore Green
     }
     foreach ($Connection in $Connections) {
-        $ConnName = $Connections -replace "`"=.*","" -replace '"',''
-        $HexBlob = $Connection -replace '"Connection\d"="','' -replace '"',''
+        $ConnName = $Connections -replace "`"=.*", "" -replace '"', ''
+        $HexBlob = $Connection -replace '"Connection\d"="', '' -replace '"', ''
         if ([string]::IsNullOrWhiteSpace($HexBlob)) {
-            Write-Warning "$ConnName missing a blob - skipping."
+            Write-Warning " $ConnName missing a blob - skipping."
             continue
         }
 

@@ -62,3 +62,9 @@ If you encounter issues:
 1. Ensure you are running the script as an administrator.
 2. Verify that SSMS 21 or SSMS 22 is installed on your machine.
 3. Check for errors in the console output for more details.
+
+---
+
+## More info
+
+For more details, visit the [PowerShell script to extract SSMS 21 and 22 saved connection data](https://vladdba.com/2025/11/22/powershell-extract-ssms-21-22-saved-connection-information/) blog post.
