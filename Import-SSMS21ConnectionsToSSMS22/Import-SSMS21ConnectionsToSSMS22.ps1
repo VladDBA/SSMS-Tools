@@ -1,5 +1,7 @@
 #Requires -RunAsAdministrator
+
 <#
+
 .SYNOPSIS
     Dynamically locate the SSMS version folders whose sdk.txt contains
     "UsePreviews=False", then import the ConnectionMruList key from SSMS 21's
@@ -20,7 +22,10 @@
 .EXAMPLE
     PS C:\> .\Import-SSMS21ConnectionsToSSMS22.ps1
     Runs the script to import saved connections from SSMS 21 to SSMS 22.
+
 #>
+
+
 Write-Host " This will overwrite SSMS 22's saved connections with those from SSMS 21." -Fore Yellow
 Write-Host " Make sure both SSMS 21 and 22 are closed before proceeding." -Fore Yellow
 # confirm with the user before proceeding
