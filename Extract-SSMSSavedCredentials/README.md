@@ -50,7 +50,7 @@ This PowerShell script extracts and decrypts DPAPI-encrypted connection strings 
 - **Backup**: The script does not modify the original `privateregistry.bin` files.
 - **Decryption Scope**: Only works for the current user profile and machine due to DPAPI encryption.
 - **Output Files**:
-  - `DecryptedConnectionStrings.txt` - contains connection names and raw connection strings in the format `Connection Name: Connection String`
+  - `DecryptedConnectionStrings.txt` - contains decrypted raw connection strings.
   - `DecryptedCredentials.txt` - contains only data sources with matching user IDs and passwords extracted from the raw connection strings.
 
 ---

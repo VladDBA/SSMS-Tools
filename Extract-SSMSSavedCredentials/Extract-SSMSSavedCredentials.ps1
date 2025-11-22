@@ -95,8 +95,6 @@ $ScriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $RawConnStringPath = Join-Path -Path $ScriptPath -ChildPath 'DecryptedConnectionStrings.txt'
 $CredentialsPath = Join-Path -Path $ScriptPath -ChildPath 'DecryptedCredentials.txt'
 
-$CurrentKey = $null
-$Entries = @()
 $ConnStrings = @()
 $Credentials = @()
 # output file header
@@ -192,57 +190,28 @@ foreach ($Folder in $MatchingDirs) {
     # Unload the hive
     Write-Host " Unloading hive..."
     Invoke-Reg -Command 'unload' -Arguments @($MountPoint)
-    
-    # Load the .reg file
-    $RegContent = Get-Content -Raw -Encoding Unicode $RegFilePath
-    $SectionRegex = '\[(?<Key>[^\]]+)\]'  
-    $ValueRegex = '"(?<Name>[^"]+)"\s*=\s*"(?<Data>[^"]*)"'
-
     $ConnStringCounter = 0
     $CredentialsCounter = 0
-
-    foreach ($line in $RegContent -split "`r?`n") {
-        if ($line -match '^\s*$') { continue }   # skip empty lines
-
-        if ($line -match $SectionRegex) {
-            $CurrentKey = $Matches['Key']
-            continue
-        }
-
-        if ($line -match $ValueRegex) {
-            $entries += [pscustomobject]@{
-                Key  = $CurrentKey
-                Name = $Matches['Name']
-                Data = $Matches['Data']
-            }
-        }
-    }
-    # group entries by index, we expect two entries per index:
-    #   ConnectionNameX  and  ConnectionX
-    $Grouped = @{}
-    foreach ($e in $entries) {
-        if ($e.Name -match '(?<Base>.+?)(?<Idx>\d+)$') {
-            $base = $Matches['Base']
-            $idx = [int]$Matches['Idx']
-            if (-not $Grouped.ContainsKey($idx)) { $Grouped[$idx] = @{} }
-            $Grouped[$idx][$base] = $e.Data
-        }
-    }
-
     $ConnStrings += "`n### Decrypted connections from $FName ###"
     $Credentials += "`n### Decrypted credentials from $FName ###"
-    # decrypt each blob and build the output lines
-    foreach ($idx in $Grouped.Keys | Sort-Object) {
-        $pair = $Grouped[$idx]
-
-        if (-not $pair.ContainsKey('ConnectionName') -or -not $pair.ContainsKey('Connection')) {
-            Write-Warning "Index $idx missing a name or a blob - skipping."
+    # Load the .reg file
+    $Connections = Select-String $RegFilePath -Pattern '"Connection\d' -Raw
+    Write-Host " Found $($Connections.Count) saved connections in $FName." -Fore Green
+    if( $Connections.Count -eq 0) {
+        Write-Host " No saved connections found in $FName - skipping decryption." -Fore Yellow
+        # clean up .reg file unless told otherwise
+        if ((-not $KeepRegFiles) -and (Test-Path -Path $RegFilePath)) {
+            Remove-Item -Path $RegFilePath -Force
+        }
+        continue
+    }
+    foreach ($Connection in $Connections) {
+        $ConnName = $Connections -replace "`"=.*","" -replace '"',''
+        $HexBlob = $Connection -replace '"Connection\d"="','' -replace '"',''
+        if ([string]::IsNullOrWhiteSpace($HexBlob)) {
+            Write-Warning "$ConnName missing a blob - skipping."
             continue
         }
-
-        $FriendlyName = $pair['ConnectionName']
-        $hexBlob = $pair['Connection']
-        $FriendlyName = $FriendlyName.Replace('\\', '\') #get rid of that extra backslash
 
         try {
             # DPAPI decryption
@@ -264,18 +233,18 @@ foreach ($Folder in $MatchingDirs) {
                 $Credentials += "## $DataSource `n     $UserID `n     $Pass"
             }
 
-            $ConnStrings += "${FriendlyName}: $clearText"
+            $ConnStrings += "$clearText"
             $ConnStringCounter++
             
         } catch {
             $msg = $_.Exception.Message
-            Write-Warning "Failed to decrypt index $idx (`"$FriendlyName`"): $msg"
-            $ConnStrings += "${FriendlyName}: *** DECRYPTION FAILED ***"
+            Write-Warning "Failed to decrypt ${ConnName}: $msg"
+            $ConnStrings += "${ConnName}: *** DECRYPTION FAILED ***"
         }
     }
 
-    Write-Host " Connection strings:" $ConnStringCounter -Fore Green
-    Write-Host " Credentials:" $CredentialsCounter -Fore Green
+    Write-Host " Decrypted connection strings:" $ConnStringCounter -Fore Green
+    Write-Host " Decrypted credentials:" $CredentialsCounter -Fore Green
     $TotalConnStrings += $ConnStringCounter
     $TotalCredentials += $CredentialsCounter
 
