@@ -210,8 +210,8 @@ foreach ($Folder in $MatchingDirs) {
         Write-Host " Found $($Connections.Count) saved connections in $FName." -Fore Green
     }
     foreach ($Connection in $Connections) {
-        $ConnName = $Connections -replace "`"=.*", "" -replace '"', ''
-        $HexBlob = $Connection -replace '"Connection\d"="', '' -replace '"', ''
+        $ConnName = $Connection -replace "`"=.*", "" -replace '"', ''
+        $HexBlob = $Connection -replace '"Connection\d+"="', '' -replace '"', ''
         if ([string]::IsNullOrWhiteSpace($HexBlob)) {
             Write-Warning " $ConnName missing a blob - skipping."
             continue
