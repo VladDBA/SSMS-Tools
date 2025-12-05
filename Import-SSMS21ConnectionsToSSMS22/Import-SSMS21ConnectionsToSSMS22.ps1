@@ -62,7 +62,11 @@ $SSMSRoot = if (!([string]::IsNullOrEmpty($OSUserName))) {
     Join-Path -Path $env:LOCALAPPDATA -ChildPath 'Microsoft\SSMS'
 }
 if (-not (Test-Path -Path $SSMSRoot)) {
-    throw "The SSMS root directory ($SSMSRoot) does not exist. Ensure SSMS is installed."
+    if (!([string]::IsNullOrEmpty($OSUserName))) {
+        throw "The SSMS root directory ($SSMSRoot) does not exist. Ensure SSMS is installed and the specified user name ($OSUserName) is correct."
+    } else {
+        throw "The SSMS root directory ($SSMSRoot) does not exist. Ensure SSMS is installed."
+    }
 }
 
 # just to make sure SSMS is not running
