@@ -23,8 +23,18 @@
     PS C:\> .\Import-SSMS21ConnectionsToSSMS22.ps1
     Runs the script to import saved connections from SSMS 21 to SSMS 22.
 
+.EXAMPLE
+    PS C:\> .\Import-SSMS21ConnectionsToSSMS22.ps1 -OSUserName "OtherUser"
+    Runs the script to import saved connections from SSMS 21 to SSMS 22
+    for the specified OS user profile.    
+
 #>
 
+
+param(
+    [Parameter(Position = 0, Mandatory = $False)]
+    [string]$OSUserName
+)
 
 Write-Host " This will overwrite SSMS 22's saved connections with those from SSMS 21." -Fore Yellow
 Write-Host " Make sure both SSMS 21 and 22 are closed before proceeding." -Fore Yellow
@@ -43,8 +53,11 @@ $MountPoint = 'HKEY_LOCAL_MACHINE\SSMSStuff'
 $MountPointTest = 'HKLM:\SSMSStuff'
 
 # where SSMS 21 and 22 related configuration folders live
-$SSMSRoot = Join-Path -Path $env:LOCALAPPDATA -ChildPath 'Microsoft\SSMS'
-
+$SSMSRoot = if (!([string]::IsNullOrEmpty($OSUserName))) {
+    Join-Path -Path "C:\Users\$OSUserName\AppData\Local" -ChildPath 'Microsoft\SSMS'
+} else {
+    Join-Path -Path $env:LOCALAPPDATA -ChildPath 'Microsoft\SSMS'
+}
 if (-not (Test-Path -Path $SSMSRoot)) {
     throw "The SSMS root directory ($SSMSRoot) does not exist. Ensure SSMS is installed."
 }

@@ -32,8 +32,14 @@ This PowerShell script imports saved connections from **SQL Server Management St
    .\Import-SSMS21ConnectionsToSSMS22.ps1
    ```
 
-3. **Follow Prompts**: The script will prompt you to confirm before proceeding.
-4. **Verify Connections**:
+3. **Optional**: Use the `-OSUserName` parameter to use a different user profile for the import
+
+   ```powershell
+   .\Import-SSMS21ConnectionsToSSMS22.ps1 -OSUserName "OtherUser"
+   ```
+
+4. **Follow Prompts**: The script will prompt you to confirm before proceeding.
+5. **Verify Connections**:
    - Open SSMS 22 and check if your SSMS 21 connections have been imported successfully.
 
 ---
