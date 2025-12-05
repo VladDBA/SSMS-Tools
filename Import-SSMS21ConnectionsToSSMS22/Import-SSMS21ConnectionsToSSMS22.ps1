@@ -18,7 +18,10 @@
 
 .LINK
     For more information, visit: https://vladdba.com/2025/11/17/import-saved-connections-from-ssms-21-to-ssms-22/  
- 
+
+.PARAMETER OSUserName
+    (Optional) Specify the OS user profile name to use for locating SSMS configuration folders.
+    
 .EXAMPLE
     PS C:\> .\Import-SSMS21ConnectionsToSSMS22.ps1
     Runs the script to import saved connections from SSMS 21 to SSMS 22.
