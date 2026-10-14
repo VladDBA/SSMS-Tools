@@ -21,6 +21,10 @@ All scripts operate on local SSMS configuration data, require administrator priv
   Requires PowerShell 7.x (DPAPI) and admin rights.
   More info: [PowerShell script to extract SSMS 21 and 22 saved connection data](https://vladdba.com/2025/11/22/powershell-extract-ssms-21-22-saved-connection-information/)
 
+- [Backup-Restore-SSMS22Connections.ps1](/Backup-Restore-SSMS22Connections/)
+  Backs up SSMS 22's saved connections by exporting the `ConnectionMruList` registry key from `privateregistry.bin` to a `.reg` file (`-Backup`), or restores them by importing that file back into the hive and replacing the existing key (`-Restore`).
+  Backups can only be restored for the same OS user profile on the same machine (DPAPI).
+
 ### Usage
 
 Run from an elevated PowerShell session. Examples:
@@ -31,6 +35,10 @@ Run from an elevated PowerShell session. Examples:
 
 # extract and decrypt saved credentials (keep .reg files for inspection)
 .\Extract-SSMSSavedCredentials.ps1 -KeepRegFiles
+
+# back up and restore SSMS22 saved connections
+.\Backup-Restore-SSMS22Connections.ps1 -Backup -BackupFile "D:\Backups\SSMS22_Connections.reg"
+.\Backup-Restore-SSMS22Connections.ps1 -Restore -BackupFile "D:\Backups\SSMS22_Connections.reg"
 ````
 
 ## Files
